@@ -1,0 +1,35 @@
+# 第三方平台工具二进制（不需要入库）
+magisk.apk
+adb
+busybox
+resetprop
+fastboot.exe
+sqlite3.exe
+mke2fs.exe
+mke2fs.conf
+make_f2fs.exe
+make_f2fs_casefold.exe
+etc1tool.exe
+hprof-conv.exe
+makecert.exe
+signtool.exe
+BouncyCastle.Crypto.dll
+Newtonsoft.Json.dll
+libwinpthread-1.dll
+AdbNativeMessaging.exe
+AdbNativeMessaging.exe.config
+UniversalAdbDriverInstaller.exe
+UniversalAdbDriverInstaller.exe.config
+UniversalAdbDriverInstaller.exe.manifest
+UniversalADB.cer
+NOTICE.txt
+source.properties
+third_party_pkgs.txt
+nmh-manifest.json
+live_setup.sh
+
+# Google USB 驱动
+usb_driver/
+
+# 个人备份文件
+opt/config/appnames - 副本.txt
