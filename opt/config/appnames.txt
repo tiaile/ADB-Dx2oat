@@ -10,27 +10,34 @@
 # 说明：HyperOS/adb 不提供解析后的应用名，这里内置常见应用的中文名。
 # 维护：新增应用加一行即可（保持 A-Z 顺序更好找），改完后重新运行 build.ps1。
 # 未知应用会直接显示包名。
+
+
+
+
+
 app.mtool.mtoolmobile=MTool
 bin.mt.plus=MT管理器
 bin.mt.termex=Termux
 cn.emagsoftware.gamehall=悟饭游戏厅
 cn.wps.moffice_eng.xiaomi.lite=WPS Office
 com.absinthe.libchecker=LibChecker
-com.autonavi.minimap=高德地图
 com.android.bankabc=中国农业银行
 com.android.calendar=日历
 com.android.chrome=Chrome浏览器
 com.android.deskclock=时钟
 com.android.providers.downloads.ui=下载管理
 com.android.soundrecorder=录音机
+com.autonavi.minimap=高德地图
 com.azure.authenticator=微软验证器
 com.baidu.netdisk.xiaomi.appunion=百度网盘(小米版)
 com.bytedance.android.doubaoime=豆包输入法
+com.canghai.haoka=172号卡
 com.chinamworld.bocmbci=中国银行手机银行
 com.coolapk.market=酷安
-com.corrodinggames.rts.zx=ZX策略游戏
+com.corrodinggames.rts.zx=铁锈战争 全汉化版
 com.deepseek.chat=DeepSeek
 com.discord=Discord
+com.duokan.phone.remotecontroller=万能遥控
 com.eg.android.AlipayGphone=支付宝
 com.example.piliplus=piliplus
 com.gamersky=游民星空
@@ -43,7 +50,7 @@ com.huanchengfly.tieba.post=贴吧精简版
 com.ibasso.volume=iBasso耳放
 com.icbc=中国工商银行
 com.jin10=金十数据
-com.ktls.fileinfo=FileInfo
+com.ktls.fileinfo=存储空间清理
 com.max.xiaoheihe=小黑盒
 com.mi.health=小米运动健康
 com.microsoft.office.onenote=OneNote
@@ -71,9 +78,9 @@ com.prpr.musedash=Muse Dash
 com.qidian.QDReader=起点读书
 com.quark.browser=夸克浏览器
 com.Qunar=去哪儿旅行
-com.rosan.installer.x.revived=安装狮X
-com.salt.music=盐音乐
-com.scee.psxandroid=PlayStation
+com.rosan.installer.x.revived=InstallerX
+com.salt.music=椒盐音乐
+com.scee.psxandroid=PS App
 com.shizhuang.duapp=得物
 com.taobao.idlefish=闲鱼
 com.taobao.taobao=淘宝
@@ -81,15 +88,17 @@ com.taptap=TapTap
 com.tencent.fortuneplat=腾讯理财通
 com.tencent.mm=微信
 com.tencent.mobileqq=QQ
+com.tencent.nrc=洛克王国：世界
 com.tencent.tmgp.sgame=王者荣耀
 com.twitter.android=X(Twitter)
-com.vgjump.jump=JUMP
 com.valvesoftware.android.steam.community=Steam
+com.vgjump.jump=JUMP
+com.xiaoji.egggame=小鸡模拟器
+com.xiaoji.xtouch=XTouch按键
 com.xiaomi.mibrain.speech=小爱语音引擎
 com.xiaomi.scanner=AI扫描
 com.xiaomi.smarthome=米家
-com.xiaoji.egggame=小鸡模拟器
-com.xiaoji.xtouch=XTouch按键
+com.xiaomi.vipaccount=小米社区
 com.xjcheng.musictageditor=MusicTag编辑器
 com.xuanjiecjd.app=玄戒工具箱
 com.xunmeng.pinduoduo=拼多多
@@ -104,8 +113,8 @@ jp.pokemon.pokemonhome=宝可梦HOME
 jp.pxv.android=Pixiv
 li.songe.gkd=GKD
 make.more.r2d2.cellular_z=Cellular-Z
-moe.shizuku.privileged.api=Shizuku
 me.weishu.kernelsu=KernelSU
+moe.shizuku.privileged.api=Shizuku
 org.augenblick.artvier=Artvier图片
 org.nobody.multitts=MultiTTS
 org.telegram.messenger=Telegram

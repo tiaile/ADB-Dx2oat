@@ -18,9 +18,9 @@ if (Test-Path "opt\dex2oat编译检查.exe") { Remove-Item "opt\dex2oat编译检
 
 Write-Host "[1/1] 编译 EXE（内嵌 adb）..."
 & $csc /nologo /target:exe /optimize+ /codepage:65001 `
-    /resource:adb.exe,adb.exe `
-    /resource:AdbWinApi.dll,AdbWinApi.dll `
-    /resource:AdbWinUsbApi.dll,AdbWinUsbApi.dll `
+    /resource:"adb shell\adb.exe,adb.exe" `
+    /resource:"adb shell\AdbWinApi.dll,AdbWinApi.dll" `
+    /resource:"adb shell\AdbWinUsbApi.dll,AdbWinUsbApi.dll" `
     /resource:lib\appnames.txt,appnames.txt `
     /out:"opt\dex2oat编译检查.exe" "lib\dex2oat编译检查.cs"
 if ($LASTEXITCODE -ne 0) { throw "编译失败" }
