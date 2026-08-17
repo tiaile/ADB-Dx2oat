@@ -18,7 +18,7 @@
 
 ## 快速使用
 
-1. 运行 `build.ps1` 构建（或使用 Releases 提供的成品），得到 `opt\dex2oat编译检查.exe`（**单文件，已内嵌 adb，无需安装任何环境**）。
+1. 运行 `build.ps1` 构建（或使用 Releases 提供的成品），得到 `opt\ADB工具箱.exe`（**单文件，已内嵌 adb，无需安装任何环境**）。
 2. 手机开启「USB 调试」并连接电脑。
 3. 双击 exe，按菜单输入序号即可。
 
@@ -47,10 +47,10 @@
 .\build.ps1
 ```
 
-- 源码：`lib\dex2oat编译检查.cs`（C#，编译时把 adb.exe + 两个 DLL + 名字表内嵌进 exe）
+- 源码：`lib\src\*.cs`（C#，按功能拆分为多个 partial class 文件，编译时把 adb.exe + 两个 DLL + 名字表内嵌进 exe）
 - 内置默认名字表：`lib\appnames.txt`
 - 构建输入（内嵌用）：`adb shell\adb.exe`、`adb shell\AdbWinApi.dll`、`adb shell\AdbWinUsbApi.dll`
-- 产物输出：`opt\dex2oat编译检查.exe`
+- 产物输出：`opt\ADB工具箱.exe`
 
 ## 目录结构
 
@@ -58,10 +58,20 @@
 .
 ├── build.ps1                 # 一键打包脚本（根目录）
 ├── lib/
-│   ├── dex2oat编译检查.cs     # C# 源码
+│   ├── src/                # C# 源码（按功能拆分为多个 partial class 文件）
+│   │   ├── Main.cs         # 入口 + adb 查找/执行核心
+│   │   ├── AppNames.cs     # 应用名对照表
+│   │   ├── AppList.cs      # 应用列表（功能 2/3）
+│   │   ├── Blacklist.cs    # 黑名单管理（功能 4）
+│   │   ├── Dex2Oat.cs      # dex2oat 状态检查（功能 1）
+│   │   ├── AdbMenu.cs      # ADB 菜单：无线调试/系统信息
+│   │   ├── QrEncoder.cs    # 二维码编码（纯算法实现）
+│   │   ├── QrWindow.cs     # 二维码弹窗（QRCoder）
+│   │   ├── DeviceStatus.cs # 连接状态/多设备处理
+│   │   └── AppManage.cs    # 应用管理（安装/卸载/小米列表）
 │   └── appnames.txt          # 内置默认应用名对照表
 ├── opt/                    # 构建产物（本地生成，不入库）
-│   ├── dex2oat编译检查.exe    # 成品（自包含，单文件可用）
+│   ├── ADB工具箱.exe         # 成品（自包含，单文件可用）
 │   └── config/appnames.txt   # 运行时生成的可编辑名字表
 ├── adb shell/                # adb 工具链及辅助文件（构建输入）
 ```
