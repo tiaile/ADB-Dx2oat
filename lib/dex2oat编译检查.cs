@@ -318,10 +318,121 @@ class Dex2OatCheck
         }
     }
 
+    // ============ 黑名单（config\blacklist.txt） ============
+    static HashSet<string> Blacklist = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+    // 加载黑名单；文件不存在则生成模板
+    static void LoadBlacklist()
+    {
+        Blacklist = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            string exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string cfgDir = Path.Combine(exeDir, "config");
+            Directory.CreateDirectory(cfgDir);
+            string path = Path.Combine(cfgDir, "blacklist.txt");
+            if (!File.Exists(path))
+            {
+                File.WriteAllText(path,
+                    "# 黑名单（每行一个包名，# 开头为注释）\n" +
+                    "# 黑名单内的应用不会出现在“未处理应用”列表，也不会被一键编译。\n",
+                    new UTF8Encoding(true));
+            }
+            foreach (string line in File.ReadAllLines(path, Encoding.UTF8))
+            {
+                string t = line.Trim();
+                if (t.Length == 0 || t.StartsWith("#")) continue;
+                Blacklist.Add(t);
+            }
+        }
+        catch { }
+    }
+
+    // 加入黑名单（保留注释，按包名 A-Z 排序重写文件）
+    static bool AddToBlacklist(string pkg)
+    {
+        try
+        {
+            string exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string cfgDir = Path.Combine(exeDir, "config");
+            Directory.CreateDirectory(cfgDir);
+            string path = Path.Combine(cfgDir, "blacklist.txt");
+            var comments = new List<string>();
+            var pkgs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (File.Exists(path))
+            {
+                foreach (string line in File.ReadAllLines(path, Encoding.UTF8))
+                {
+                    string t = line.Trim();
+                    if (t.Length == 0 || t.StartsWith("#")) { comments.Add(line); continue; }
+                    pkgs.Add(t);
+                }
+            }
+            if (!pkgs.Add(pkg)) return false;   // 已在黑名单
+
+            var sb = new StringBuilder();
+            foreach (string c in comments) sb.AppendLine(c);
+            if (comments.Count > 0) sb.AppendLine();
+            var keys = new List<string>(pkgs);
+            keys.Sort(StringComparer.OrdinalIgnoreCase);
+            foreach (string k in keys) sb.AppendLine(k);
+            File.WriteAllText(path, sb.ToString(), new UTF8Encoding(true));
+
+            Blacklist.Add(pkg);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("! 写入 config\\blacklist.txt 失败：" + ex.Message);
+            return false;
+        }
+    }
+
+    // 移出黑名单（保留注释，按包名 A-Z 排序重写文件）
+    static bool RemoveFromBlacklist(string pkg)
+    {
+        try
+        {
+            string exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string cfgDir = Path.Combine(exeDir, "config");
+            Directory.CreateDirectory(cfgDir);
+            string path = Path.Combine(cfgDir, "blacklist.txt");
+            var comments = new List<string>();
+            var pkgs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (File.Exists(path))
+            {
+                foreach (string line in File.ReadAllLines(path, Encoding.UTF8))
+                {
+                    string t = line.Trim();
+                    if (t.Length == 0 || t.StartsWith("#")) { comments.Add(line); continue; }
+                    pkgs.Add(t);
+                }
+            }
+            if (!pkgs.Remove(pkg)) return false;   // 不在黑名单
+
+            var sb = new StringBuilder();
+            foreach (string c in comments) sb.AppendLine(c);
+            if (comments.Count > 0) sb.AppendLine();
+            var keys = new List<string>(pkgs);
+            keys.Sort(StringComparer.OrdinalIgnoreCase);
+            foreach (string k in keys) sb.AppendLine(k);
+            File.WriteAllText(path, sb.ToString(), new UTF8Encoding(true));
+
+            Blacklist.Remove(pkg);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("! 写入 config\\blacklist.txt 失败：" + ex.Message);
+            return false;
+        }
+    }
+
     static void Main()
     {
         ADB = FindAdb();
         LoadAppNames();
+        LoadBlacklist();
 
         // 主菜单：输入序号进入对应功能
         while (true)
@@ -332,6 +443,7 @@ class Dex2OatCheck
             Console.WriteLine("  [1] dex2oat 编译状态检查");
             Console.WriteLine("  [2] 列出用户安装应用（应用名+包名）");
             Console.WriteLine("  [3] 列出系统应用（应用名+包名）");
+            Console.WriteLine("  [4] 黑名单管理（查看/移出）");
             Console.WriteLine("  [0] 退出");
             Console.WriteLine("========================================");
             Console.Write("请输入序号：");
@@ -342,6 +454,7 @@ class Dex2OatCheck
             else if (choice == "1") RunDex2OatCheck();
             else if (choice == "2") ListApps();
             else if (choice == "3") ListSystemApps();
+            else if (choice == "4") ManageBlacklist();
             else Console.WriteLine("无效序号：" + choice);
 
             Console.WriteLine();
@@ -415,29 +528,59 @@ class Dex2OatCheck
             Console.WriteLine("  " + (e[2] == e[1] ? e[1] : e[2]));   // 未识别才显示包名
         Console.WriteLine("========================================");
 
-        // 未处理列表（无 OAT + 仅轻量验证）
-        var notDone = new List<string[]>();
-        notDone.AddRange(verifyApps);
-        notDone.AddRange(uncompiledApps);
-        Console.WriteLine();
-        Console.WriteLine("未处理应用列表（" + notDone.Count + " 个）：");
-        Console.WriteLine("========================================");
-        foreach (string[] e in notDone)
-            Console.WriteLine("  " + (e[2] == e[1] ? e[1] : e[2]));   // 未识别才显示包名
-        Console.WriteLine("========================================");
+        // 未处理列表（无 OAT + 仅轻量验证），剔除黑名单后进入交互菜单
+        ShowUncompiledMenu(verifyApps, uncompiledApps);
+    }
 
-        if (uncompiledApps.Count > 0)
+    // 未处理应用交互菜单：一键编译 / 输入序号加入黑名单
+    static void ShowUncompiledMenu(List<string[]> verifyApps, List<string[]> uncompiledApps)
+    {
+        while (true)
         {
+            var notDone = new List<string[]>();
+            notDone.AddRange(verifyApps);
+            notDone.AddRange(uncompiledApps);
+            var filtered = notDone.FindAll(e => !Blacklist.Contains(e[1]));
+
             Console.WriteLine();
-            Console.Write("是否一键编译未处理（无 OAT）的应用？[Y/N] ");
-            string response = Console.ReadLine();
-            if (response != null && (response.Trim().ToLowerInvariant() == "y" || response.Trim().ToLowerInvariant() == "yes"))
+            if (filtered.Count == 0)
             {
+                Console.WriteLine("未处理应用已全部处理或已加入黑名单，无需操作。");
+                return;
+            }
+
+            Console.WriteLine("未处理应用列表（" + filtered.Count + " 个）：");
+            Console.WriteLine("========================================");
+            for (int i = 0; i < filtered.Count; i++)
+            {
+                string pkg = filtered[i][1];
+                Console.WriteLine("  [" + (i + 1) + "] " + (filtered[i][2] == pkg ? pkg : filtered[i][2]));
+            }
+            Console.WriteLine("========================================");
+            Console.WriteLine("  Y     一键编译未处理应用（黑名单除外）");
+            Console.WriteLine("  序号  加入黑名单（可逗号分隔，如 1,3,5）");
+            Console.WriteLine("  回车  返回菜单");
+            Console.Write(">>> ");
+            string input = Console.ReadLine();
+            if (input == null) return;
+            input = input.Trim();
+            if (input.Length == 0) return;
+
+            string lower = input.ToLowerInvariant();
+            if (lower == "y" || lower == "yes")
+            {
+                // 一键编译：仅无 OAT 且不在黑名单中的应用
+                var toCompile = uncompiledApps.FindAll(e => !Blacklist.Contains(e[1]));
+                if (toCompile.Count == 0)
+                {
+                    Console.WriteLine("没有可编译的应用（未处理的已在黑名单中）。");
+                    return;
+                }
                 Console.WriteLine();
                 Console.WriteLine("开始编译未处理的应用...");
                 Console.WriteLine("========================================");
                 int ok = 0, fail = 0;
-                foreach (string[] e in uncompiledApps)
+                foreach (string[] e in toCompile)
                 {
                     string pkg = e[1];
                     Console.Write("正在编译: " + (e[2] == e[1] ? e[1] : e[2]) + "... ");
@@ -465,15 +608,87 @@ class Dex2OatCheck
                     Console.WriteLine("部分应用编译失败，请检查错误信息");
                 Console.WriteLine("提示：如果某些应用反复编译不成功，可能是该应用有系统编译限制，");
                 Console.WriteLine("      这种情况下应用仍以 verify 模式运行，属于正常现象。");
+                return;
+            }
+
+            // 解析序号列表，加入黑名单
+            bool any = false;
+            var added = new List<string>();
+            foreach (string part in input.Split(new char[] { ',', '，', ' ', '、', ';' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                int n;
+                if (int.TryParse(part, out n) && n >= 1 && n <= filtered.Count)
+                {
+                    string pkg = filtered[n - 1][1];
+                    if (AddToBlacklist(pkg)) { added.Add(pkg); any = true; }
+                }
+            }
+            if (any)
+            {
+                Console.WriteLine("已加入黑名单：" + string.Join(", ", added));
+                Console.WriteLine("（黑名单保存于 config\\blacklist.txt，可手动编辑移除）");
+                // 继续循环，列表刷新后重新显示
             }
             else
             {
-                Console.WriteLine("已取消编译操作");
+                Console.WriteLine("无效输入：" + input);
             }
         }
-        else
+    }
+
+    // 功能4：黑名单管理（查看/移出）
+    static void ManageBlacklist()
+    {
+        while (true)
         {
-            Console.WriteLine("所有应用都已处理完毕！");
+            var list = new List<string>(Blacklist);
+            list.Sort(StringComparer.OrdinalIgnoreCase);
+
+            Console.WriteLine("========================================");
+            Console.WriteLine("  黑名单管理（" + list.Count + " 个）");
+            Console.WriteLine("========================================");
+            if (list.Count == 0)
+            {
+                Console.WriteLine("  （黑名单为空）");
+                Console.WriteLine("  提示：可在功能 1 的未处理列表中输入序号添加黑名单。");
+                Console.WriteLine("========================================");
+                return;
+            }
+            for (int i = 0; i < list.Count; i++)
+            {
+                string pkg = list[i];
+                string name = AppName(pkg);
+                Console.WriteLine("  [" + (i + 1) + "] " + (name == pkg ? pkg : name + " (" + pkg + ")"));
+            }
+            Console.WriteLine("========================================");
+            Console.WriteLine("  序号  移出黑名单（可逗号分隔，如 1,3,5）");
+            Console.WriteLine("  回车  返回菜单");
+            Console.Write(">>> ");
+            string input = Console.ReadLine();
+            if (input == null) return;
+            input = input.Trim();
+            if (input.Length == 0) return;
+
+            bool any = false;
+            var removed = new List<string>();
+            foreach (string part in input.Split(new char[] { ',', '，', ' ', '、', ';' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                int n;
+                if (int.TryParse(part, out n) && n >= 1 && n <= list.Count)
+                {
+                    string pkg = list[n - 1];
+                    if (RemoveFromBlacklist(pkg)) { removed.Add(pkg); any = true; }
+                }
+            }
+            if (any)
+            {
+                Console.WriteLine("已移出黑名单：" + string.Join(", ", removed));
+                // 继续循环，列表刷新后重新显示
+            }
+            else
+            {
+                Console.WriteLine("无效输入：" + input);
+            }
         }
     }
 }

@@ -1,34 +1,6 @@
-# 第三方平台工具二进制（不需要入库）
-magisk.apk
-adb
-busybox
-resetprop
-fastboot.exe
-sqlite3.exe
-mke2fs.exe
-mke2fs.conf
-make_f2fs.exe
-make_f2fs_casefold.exe
-etc1tool.exe
-hprof-conv.exe
-makecert.exe
-signtool.exe
-BouncyCastle.Crypto.dll
-Newtonsoft.Json.dll
-libwinpthread-1.dll
-AdbNativeMessaging.exe
-AdbNativeMessaging.exe.config
-UniversalAdbDriverInstaller.exe
-UniversalAdbDriverInstaller.exe.config
-UniversalAdbDriverInstaller.exe.manifest
-UniversalADB.cer
-NOTICE.txt
-source.properties
-third_party_pkgs.txt
-nmh-manifest.json
-live_setup.sh
+# 工具文件已随 adb shell\ 目录入库，用于菜单中的 adb 命令快捷功能
 
-# Google USB 驱动
+# Google USB 驱动（体积大且可从平台工具包单独获取，不入库）
 usb_driver/
 
 # 构建产物（exe 及运行时生成的名字表，不入库）
