@@ -54,7 +54,7 @@
 │   ├── dex2oat编译检查.exe    # 成品（自包含，单文件可用）
 │   └── config/appnames.txt   # 运行时生成的可编辑名字表
 ├── adb shell/                # adb 工具链及辅助文件（构建输入）
-└── usb_driver/               # Google USB 驱动（备用）
+└── usb_driver/               # Google USB 驱动（git submodule，克隆后需 git submodule update --init）
 ```
 
 ## 说明
