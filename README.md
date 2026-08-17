@@ -29,6 +29,16 @@
 - 输入 `0` 可切换「只看未命名应用」，方便批量补名。
 - 想恢复默认，删除 `config\appnames.txt` 重新运行即可。
 
+## 常见问题：ADB 无法识别设备时可以尝试的方法
+
+`adb devices` 检测不到手机（或 fastboot 模式无设备）时，多数是缺少 **Google USB 驱动**，可尝试：
+
+1. 到 Google 官网下载官方 USB 驱动：https://developer.android.com/studio/run/win-usb
+2. 解压得到 `usb_driver` 文件夹
+3. 打开「设备管理器」→ 右键未识别设备 →「更新驱动程序」→「浏览我的电脑以查找驱动程序」→ 选择解压出的 `usb_driver` 文件夹安装
+
+> 驱动文件体积较大，不随本仓库分发，需要时请从官网下载。
+
 ## 构建（可选）
 
 需要 Windows 自带的 .NET Framework（csc.exe），无需其他工具链：
@@ -54,8 +64,8 @@
 │   ├── dex2oat编译检查.exe    # 成品（自包含，单文件可用）
 │   └── config/appnames.txt   # 运行时生成的可编辑名字表
 ├── adb shell/                # adb 工具链及辅助文件（构建输入）
-└── usb_driver/               # Google USB 驱动（git submodule，克隆后需 git submodule update --init）
 ```
+（USB 驱动不随仓库分发，需用时从官网下载，见上方「常见问题」一节。）
 
 ## 说明
 

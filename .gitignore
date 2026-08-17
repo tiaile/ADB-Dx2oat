@@ -1,5 +1,5 @@
 # 工具文件已随 adb shell\ 目录入库，用于菜单中的 adb 命令快捷功能
-# usb_driver\ 为 git submodule，指向第三方仓库的官方驱动副本（见 .gitmodules）
+# 注：USB 驱动不随仓库分发，需用时见 README「ADB 无法识别设备」一节，从官网下载
 
 # 构建产物（exe 及运行时生成的名字表，不入库）
 opt/
